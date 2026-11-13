@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aurora H-3 Hybrid | Aerospace Engineering Dashboard</title>
+    <style>
+        :root {
+            --bg-dark: #0b0f19;
+            --card-bg: #131c2e;
+            --border-color: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --electric-cyan: #06b6d4;
+            --fuel-amber: #f59e0b;
+            --nuclear-crimson: #ef4444;
+            --safety-emerald: #10b981;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+        body { background-color: var(--bg-dark); color: var(--text-main); line-height: 1.6; padding: 2rem; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        header { text-align: center; margin-bottom: 2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1.5rem; }
+        header h1 { font-size: 2.5rem; color: var(--electric-cyan); margin-bottom: 0.5rem; letter-spacing: 1px; }
+        header p { color: var(--text-muted); font-size: 1.1rem; }
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem; }
+        @media(max-width: 900px) { .dashboard-grid { grid-template-columns: 1fr; } }
+        .card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; }
+        .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+        .badge-electric { background-color: rgba(6, 182, 212, 0.2); color: var(--electric-cyan); border: 1px solid var(--electric-cyan); }
+        .badge-fuel { background-color: rgba(245, 158, 11, 0.2); color: var(--fuel-amber); border: 1px solid var(--fuel-amber); }
+        .badge-nuclear { background-color: rgba(239, 68, 68, 0.2); color: var(--nuclear-crimson); border: 1px solid var(--nuclear-crimson); }
+        .badge-safety { background-color: rgba(16, 185, 129, 0.2); color: var(--safety-emerald); border: 1px solid var(--safety-emerald); }
+        ul { list-style-type: none; }
+        ul li { margin-bottom: 0.75rem; padding-left: 1rem; position: relative; }
+        ul li::before { content: "▪"; position: absolute; left: 0; color: var(--electric-cyan); }
+        .full-width { grid-column: 1 / -1; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border-color); font-size: 0.95rem; }
+        th { background-color: rgba(255,255,255,0.03); color: var(--electric-cyan); }
+        tr:hover { background-color: rgba(255,255,255,0.01); }
+        .image-container { text-align: center; margin: 1.5rem 0; }
+        .image-container img { max-width: 100%; border-radius: 8px; border: 1px solid var(--border-color); }
+        footer { text-align: center; margin-top: 3rem; color: var(--text-muted); font-size: 0.9rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AURORA H-3 HYBRID</h1>
+            <p>Tri-Hybrid Aerospace Engineering Architecture & Operational Technical Documentation</p>
+        </header>
+
+        <div class="dashboard-grid">
+            <!-- Propulsion System -->
+            <div class="card">
+                <h2>⚡ Propulsion & Energy Architecture</h2>
+                <ul>
+                    <li><strong style="color: var(--electric-cyan);">Electric System:</strong> High-capacity Battery Array, Main Bus, and Superconducting Rear Electric Fan Unit[cite: 1].</li>
+                    <li><strong style="color: var(--fuel-amber);">Conventional Fuel:</strong> Jet A-1 Fuel Tanks feeding large advanced wing-mounted turbofan engines with variable-area nozzles[cite: 1, 2].</li>
+                    <li><strong style="color: var(--nuclear-crimson);">Nuclear System:</strong> Small Modular Liquid Metal Cooled Reactor (SMR) with Lead/Steel Containment, Steam Generator Heat Exchanger, Steam Turbine, and Generator[cite: 1].</li>
+                </ul>
+            </div>
+
+            <!-- Safety & Defense Systems -->
+            <div class="card">
+                <h2>🛡️ Advanced Safety & Defense Features</h2>
+                <ul>
+                    <li><strong style="color: var(--safety-emerald);">Collision Avoidance:</strong> Nose-mounted AESA Radar and LiDAR array[cite: 5].</li>
+                    <li><strong style="color: var(--safety-emerald);">Crew Protection:</strong> Autonomous pilot ejection seats and dual avionics hardening[cite: 3, 5].</li>
+                    <li><strong style="color: var(--safety-emerald);">Environmental Defense:</strong> Active de-icing, lightning attachment dissipation grid, volcanic ash purging filters, and aeroservoelastic flutter compensation[cite: 3, 5, 6].</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- System Schematic Image Preview -->
+        <div class="card full-width">
+            <h2>📊 Aircraft Cross-Section & Environmental Zoning</h2>
+            <div class="image-container">
+                <img src="watermarked_img_11209050766074747453.png" alt="Aurora H-3 Hybrid Cross-Section Diagram">
+            </div>
+        </div>
+
+        <!-- Scenario Matrix Table -->
+        <div class="card full-width">
+            <h2>📋 Scenario-Wise Operational Breakdown</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Operational Scenario</th>
+                        <th>Atmospheric & Flight Conditions</th>
+                        <th>Propulsion & Energy Behavior</th>
+                        <th>Safety & Passenger Features</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>1. Base Design</strong></td>
+                        <td>Standard high-altitude profile[cite: 1]</td>
+                        <td>Tri-hybrid integration (Electric, Jet A-1, SMR Nuclear)[cite: 1]</td>
+                        <td>Lead/steel reactor shielding, cargo and passenger bays[cite: 1]</td>
+                    </tr>
+                    <tr>
+                        <td><strong>2. Global Air Density</strong></td>
+                        <td>Troposphere to Stratosphere ($1.2\text{ kg/m}^3$ to thin air)[cite: 2]</td>
+                        <td>Variable-area nozzles & optional closed-Brayton SMR cycle[cite: 2]</td>
+                        <td>Continuous lift management across global latitudes[cite: 2]</td>
+                    </tr>
+                    <tr>
+                        <td><strong>3. Adverse Weather</strong></td>
+                        <td>Lightning, SLD icing, volcanic ash, severe turbulence, polar cold[cite: 3]</td>
+                        <td>Ash filtration stress, ice accumulation on lifting surfaces[cite: 3]</td>
+                        <td>Lightning diversion, active anti-icing, stress monitoring[cite: 3]</td>
+                    </tr>
+                    <tr>
+                        <td><strong>4. Favorable Weather</strong></td>
+                        <td>Clear atmosphere, laminar airflow, pristine stratospheric air[cite: 4]</td>
+                        <td>Solar harvest optimization, clean-burn cogenerative turbofans[cite: 4]</td>
+                        <td>Automated cabin ECS ($\text{CO}_2$, humidity, temperature regulation)[cite: 4]</td>
+                    </tr>
+                    <tr>
+                        <td><strong>5. Enhanced Safety & Comfort</strong></td>
+                        <td>High stratospheric cruise ($110,000\text{–}120,000\text{ ft}$)[cite: 5]</td>
+                        <td>Extended dorsal solar cell array integration[cite: 5]</td>
+                        <td>AESA collision radar, wellness lounge pod, observatory deck[cite: 5]</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <footer>
+            <p>&copy; 2026 Aurora Aerospace Systems. All rights reserved. Deployed to nammojain-dotcom.</p>
+        </footer>
+    </div>
+</body>
+</html>
