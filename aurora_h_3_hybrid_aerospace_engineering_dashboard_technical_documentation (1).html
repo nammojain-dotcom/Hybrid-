@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AURORA H-3 HYBRID — Tri-Hybrid Aerospace Engineering Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            space: '#070d19',
+            panel: '#0c1527',
+            panelLight: '#111e38',
+            electric: '#00f0ff',
+            fuel: '#ffb800',
+            nuclear: '#ff3b30',
+            safety: '#10b981',
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    /* Aerospace Blueprint Grid & Custom Scrollbar */
+    body {
+      background-color: #070d19;
+      color: #e2e8f0;
+      background-image:
+        linear-gradient(to right, rgba(0, 240, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 240, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(to right, rgba(0, 240, 255, 0.015) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 240, 255, 0.015) 1px, transparent 1px);
+      background-size: 80px 80px, 80px 80px, 16px 16px, 16px 16px;
+    }
+
+    .glass-panel {
+      background: rgba(12, 21, 39, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(56, 189, 248, 0.16);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+    }
+
+    .glow-electric { box-shadow: 0 0 15px rgba(0, 240, 255, 0.25); }
+    .glow-fuel { box-shadow: 0 0 15px rgba(255, 184, 0, 0.25); }
+    .glow-nuclear { box-shadow: 0 0 15px rgba(255, 59, 48, 0.28); }
+    .glow-safety { box-shadow: 0 0 15px rgba(16, 185, 129, 0.25); }
+
+    /* Animated Energy Flow Dashes inside SVG */
+    @keyframes flowDash {
+      to {
+        stroke-dashoffset: -36;
+      }
+    }
+    .energy-flow {
+      stroke-dasharray: 6 6;
+      animation: flowDash 1.2s linear infinite;
+    }
+
+    @keyframes pulseRing {
+      0% { transform: scale(0.9); opacity: 0.9; }
+      70% { transform: scale(1.65); opacity: 0; }
+      100% { transform: scale(1.65); opacity: 0; }
+    }
+    .hotspot-pulse {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: pulseRing 2.2s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+    }
+
+    /* Custom Range Slider */
+    input[type="range"] {
+      -webkit-appearance: none;
+      background: rgba(30, 41, 59, 0.9);
+      height: 6px;
+      border-radius: 999px;
+      border: 1px solid rgba(0, 240, 255, 0.25);
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #00f0ff;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.8);
+      border: 2px solid #070d19;
+    }
+
+    /* Print Styles for Technical Documentation Export */
+    @media print {
+      body {
+        background: #ffffff !important;
+        color: #0f172a !important;
+        background-image: none !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .glass-panel {
+        background: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        box-shadow: none !important;
+        color: #0f172a !important;
+      }
+      .print-show-all {
+        display: block !important;
+      }
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #070d19; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #334155; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-cyan-500/30 selection:text-cyan-200">
+
+  <!-- Top Aerospace Command Header -->
+  <header class="sticky top-0 z-40 glass-panel border-b border-cyan-500/20 px-4 sm:px-6 py-3">
+    <div class="max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-400/40 flex items-center justify-center shrink-0 glow-electric">
+          <svg class="w-6 h-6 text-electric" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M12 2L4 7v10l8 5 8-5V7l-8-5z" />
+            <circle cx="12" cy="12" r="3" />
+            <path d="M12 2v7M12 15v7M4 7l5.5 3.2M14.5 13.8L20 17M20 7l-5.5 3.2M9.5 13.8L4 17" />
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h1 class="text-lg sm:text-xl font-extrabold tracking-wider text-white">AURORA H-3 HYBRID</h1>
+            <span class="px-2 py-0.5 text-[11px] font-mono font-semibold uppercase tracking-widest rounded bg-cyan-500/15 text-electric border border-cyan-400/30">
+              TRI-HYBRID ARCHITECTURE
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 font-mono">
+            FUSELAGE: <span class="text-slate-200">90m</span> | SPAN REF: <span class="text-slate-200">120m</span> | CEILING: <span class="text-slate-200">120,000 ft (MESOSPHERE BOUNDARY)</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Primary Navigation Tabs -->
+      <nav class="flex flex-wrap items-center gap-1.5 no-print" aria-label="Primary Engineering Views">
+        <button onclick="switchTab('schematic')" id="tab-schematic" class="nav-tab px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all bg-cyan-500/20 text-electric border border-cyan-400/40">
+          1. Cross-Section Explorer
+        </button>
+        <button onclick="switchTab('scenarios')" id="tab-scenarios" class="nav-tab px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all text-slate-300 hover:bg-slate-800/70 border border-transparent">
+          2. Scenario Simulator (6)
+        </button>
+        <button onclick="switchTab('failures')" id="tab-failures" class="nav-tab px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all text-slate-300 hover:bg-slate-800/70 border border-transparent">
+          3. Failure &amp; Counter-Matrix
+        </button>
+        <button onclick="switchTab('docs')" id="tab-docs" class="nav-tab px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all text-slate-300 hover:bg-slate-800/70 border border-transparent">
+          4. Master Spec &amp; Table
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Live Telemetry Ribbon -->
+  <div class="bg-[#091224]/90 border-b border-slate-800/90 px-4 sm:px-6 py-2">
+    <div class="max-w-7xl mx-auto grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 text-xs font-mono">
+      <div class="bg-slate-900/80 border border-slate-800 rounded-lg px-3 py-1.5">
+        <div class="text-[10px] text-slate-400 uppercase">Active Profile</div>
+        <div id="hud-profile" class="text-electric font-bold truncate">SCENARIO 1: BASELINE</div>
+      </div>
+      <div class="bg-slate-900/80 border border-slate-800 rounded-lg px-3 py-1.5">
+        <div class="text-[10px] text-slate-400 uppercase">Altitude &amp; Layer</div>
+        <div id="hud-altitude" class="text-white font-semibold truncate">45,000 ft • STRATOSPHERE</div>
+      </div>
+      <div class="bg-slate-900/80 border border-slate-800 rounded-lg px-3 py-1.5">
+        <div class="text-[10px] text-slate-400 uppercase">Air Density / Temp</div>
+        <div id="hud-density" class="text-amber-300 font-semibold truncate">0.24 kg/m³ • -56.5°C</div>
+      </div>
+      <div class="bg-slate-900/80 border border-slate-800 rounded-lg px-3 py-1.5">
+        <div class="text-[10px] text-slate-400 uppercase">Tri-Hybrid Mix</div>
+        <div id="hud-power" class="text-cyan-300 font-semibold truncate">E:35% | F:35% | N:30%</div>
+      </div>
+      <div class="bg-slate-900/80 border border-slate-800 rounded-lg px-3 py-1.5">
+        <div class="text-[10px] text-slate-400 uppercase">Ash Filter / De-Ice</div>
+        <div id="hud-filters" class="text-emerald-400 font-semibold truncate">ASH: OK • ICE: STANDBY</div>
+      </div>
+      <div class="bg-slate-900/80 border border-slate-800 rounded-lg px-3 py-1.5">
+        <div class="text-[10px] text-slate-400 uppercase">Defense &amp; Shielding</div>
+        <div id="hud-shielding" class="text-emerald-400 font-semibold truncate">NOMINAL • CONTAINMENT LOCK</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Workspace -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
+
+    <!-- ===================================================================== -->
+    <!-- VIEW 1: INTERACTIVE CROSS-SECTION & SCHEMATIC EXPLORER                -->
+    <!-- ===================================================================== -->
+    <section id="view-schematic" class="space-y-6">
+      <!-- Top Controls: Layer Toggles & Quick Scenario Bar -->
+      <div class="glass-panel rounded-2xl p-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div>
+          <h2 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-electric animate-ping"></span>
+            Interactive Internal Cross-Section Schematic
+          </h2>
+          <p class="text-xs text-slate-400 mt-0.5">
+            Click any subsystem node on the aircraft cutaway to inspect cross-scenario telemetry, design specifications, and counter-mitigation behavior.
+          </p>
+        </div>
+
+        <!-- Layer Isolation Toggles -->
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-xs font-mono text-slate-400 mr-1">ISOLATE LAYER:</span>
+          <button onclick="setLayerFilter('all')" id="layer-all" class="layer-btn px-3 py-1.5 rounded-lg text-xs font-mono font-semibold bg-slate-700 text-white border border-slate-500 transition">
+            ALL SYSTEMS
+          </button>
+          <button onclick="setLayerFilter('electric')" id="layer-electric" class="layer-btn px-3 py-1.5 rounded-lg text-xs font-mono font-semibold bg-cyan-950/60 text-electric border border-cyan-500/40 hover:bg-cyan-900/60 transition flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-electric"></span> ELECTRIC
+          </button>
+          <button onclick="setLayerFilter('fuel')" id="layer-fuel" class="layer-btn px-3 py-1.5 rounded-lg text-xs font-mono font-semibold bg-amber-950/60 text-fuel border border-amber-500/40 hover:bg-amber-900/60 transition flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-fuel"></span> JET A-1 FUEL
+          </button>
+          <button onclick="setLayerFilter('nuclear')" id="layer-nuclear" class="layer-btn px-3 py-1.5 rounded-lg text-xs font-mono font-semibold bg-red-950/60 text-nuclear border border-red-500/40 hover:bg-red-900/60 transition flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-nuclear"></span> NUCLEAR SMR
+          </button>
+          <button onclick="setLayerFilter('safety')" id="layer-safety" class="layer-btn px-3 py-1.5 rounded-lg text-xs font-mono font-semibold bg-emerald-950/60 text-safety border border-emerald-500/40 hover:bg-emerald-900/60 transition flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-safety"></span> SAFETY &amp; DEFENSE
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Interactive Blueprint Grid: SVG Canvas + Subsystem Inspector -->
+      <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+        <!-- SVG Cutaway Canvas (8 cols on xl) -->
+        <div class="xl:col-span-8 glass-panel rounded-2xl p-3 sm:p-5 flex flex-col justify-between relative overflow-hidden">
+          <!-- Atmospheric Backdrop Overlay (dynamically tinted by Scenario) -->
+          <div id="schematic-atmosphere-bg" class="absolute inset-0 pointer-events-none opacity-35 transition-all duration-700"
+               style="background: radial-gradient(circle at 20% 25%, rgba(0, 240, 255, 0.14), transparent 55%), radial-gradient(circle at 80% 75%, rgba(16, 185, 129, 0.12), transparent 55%);">
+          </div>
+
+          <div class="relative z-10 flex items-center justify-between text-xs font-mono text-slate-400 mb-2">
+            <span>DWG NO: AUR-H3-XSEC-06 // REV 6.0</span>
+            <span id="schematic-zone-indicator" class="text-cyan-300">MODE: TRI-HYBRID CUTAWAY</span>
+          </div>
+
+          <!-- Responsive High-Detail Vector Cutaway SVG -->
+          <div class="relative z-10 w-full overflow-x-auto">
+            <svg id="aurora-svg" viewBox="0 0 1060 470" class="w-full h-auto select-none" role="img" aria-label="Aurora H-3 Hybrid Cross-Section Schematic">
+              <defs>
+                <linearGradient id="fuselageGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#1e293b" />
+                  <stop offset="50%" stop-color="#0f172a" />
+                  <stop offset="100%" stop-color="#090f1d" />
+                </linearGradient>
+                <linearGradient id="fuelTankGrad" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#d97706" />
+                  <stop offset="50%" stop-color="#ffb800" />
+                  <stop offset="100%" stop-color="#b45309" />
+                </linearGradient>
+                <radialGradient id="reactorCoreGrad" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="#fff1f2" />
+                  <stop offset="35%" stop-color="#ff3b30" />
+                  <stop offset="100%" stop-color="#7f1d1d" />
+                </radialGradient>
+                <linearGradient id="batteryGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#00f0ff" />
+                  <stop offset="100%" stop-color="#0284c7" />
+                </linearGradient>
+                <linearGradient id="safetyGrad" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#10b981" />
+                  <stop offset="100%" stop-color="#059669" />
+                </linearGradient>
+                <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="3" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+
+              <!-- Dimension Lines (90m Fuselage / 120m Span Reference) -->
+              <g stroke="#475569" stroke-width="1" font-family="JetBrains Mono, monospace" font-size="11" fill="#94a3b8">
+                <line x1="70" y1="435" x2="940" y2="435" stroke-dasharray="4 3" />
+                <line x1="70" y1="425" x2="70" y2="445" />
+                <line x1="940" y1="425" x2="940" y2="445" />
+                <rect x="435" y="425" width="140" height="20" rx="4" fill="#070d19" stroke="#334155" />
+                <text x="505" y="439" text-anchor="middle" fill="#cbd5e1">FUSELAGE: 90m</text>
+
+                <line x1="330" y1="458" x2="860" y2="458" stroke="#334155" stroke-dasharray="2 2" />
+                <text x="595" y="462" text-anchor="middle" font-size="10" fill="#64748b">OVERALL SPAN REFERENCE: 120m</text>
+              </g>
+
+              <!-- Far Wing (Port Wing Background) -->
+              <path d="M 410 190 L 520 82 L 560 82 L 495 190 Z" fill="#132038" stroke="#334155" stroke-width="1.5" />
+              <!-- Port Wing Active De-Icing & Flutter Strip -->
+              <path class="sys-group sys-safety" d="M 414 188 L 522 84" stroke="#10b981" stroke-width="2.5" stroke-dasharray="5 3" />
+
+              <!-- Vertical Stabilizer & Tailplane -->
+              <path d="M 815 175 L 945 36 L 992 36 L 925 182 Z" fill="url(#fuselageGrad)" stroke="#475569" stroke-width="2" />
+              <path d="M 885 215 L 1025 198 L 1035 212 L 905 232 Z" fill="#16243d" stroke="#475569" stroke-width="1.5" />
+
+              <!-- Main Fuselage Outer Shell -->
+              <path d="M 70 245 C 70 195, 145 168, 255 168 L 785 168 C 855 168, 910 185, 955 208 L 955 246 C 910 268, 850 282, 770 282 L 245 282 C 135 282, 70 268, 70 245 Z"
+                    fill="url(#fuselageGrad)" stroke="#64748b" stroke-width="2.2" />
+
+              <!-- Cutaway Interior Hull Cavity -->
+              <path d="M 135 238 C 135 198, 185 178, 260 178 L 775 178 C 835 178, 880 192, 915 212 L 915 242 C 880 260, 830 272, 765 272 L 250 272 C 175 272, 135 258, 135 238 Z"
+                    fill="#081020" stroke="#334155" stroke-width="1.2" />
+
+              <!-- Deck Divider Floor -->
+              <line x1="155" y1="232" x2="880" y2="232" stroke="#334155" stroke-width="1.5" />
+
+              <!-- ============================================================ -->
+              <!-- SAFETY & DEFENSE LAYER (EMERALD #10b981)                     -->
+              <!-- ============================================================ -->
+              <g class="sys-group sys-safety">
+                <!-- Nose AESA Radar & LiDAR Collision Avoidance Array -->
+                <path d="M 74 242 C 74 218, 95 202, 122 198 L 122 256 C 95 254, 74 250, 74 242 Z" fill="rgba(16,185,129,0.22)" stroke="#10b981" stroke-width="1.8" />
+                <path d="M 65 225 L 25 212 M 65 236 L 20 236 M 65 247 L 25 260" stroke="#10b981" stroke-width="1.3" stroke-dasharray="3 3" />
+
+                <!-- Lightning Attachment & Wind Dissipation Grid -->
+                <path d="M 110 192 Q 210 172 340 172" fill="none" stroke="#10b981" stroke-width="2" stroke-dasharray="6 3" />
+
+                <!-- Autonomous Ejection Seats (Pilots) -->
+                <rect x="132" y="196" width="24" height="28" rx="4" fill="rgba(16,185,129,0.2)" stroke="#10b981" stroke-width="1.5" />
+                <path d="M 144 194 L 144 176" stroke="#10b981" stroke-width="1.5" stroke-dasharray="2 2" />
+
+                <!-- Journey-Specific Amenities Bay (Lounge & Wellness Pod) -->
+                <rect x="275" y="236" width="76" height="31" rx="4" fill="rgba(16,185,129,0.16)" stroke="#10b981" stroke-width="1.4" />
+                <text x="313" y="255" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#6ee7b7">LOUNGE/POD</text>
+
+                <!-- Multi-Spectrum Cargo Scanner & Cargo Hold -->
+                <rect x="358" y="236" width="66" height="31" rx="4" fill="rgba(16,185,129,0.16)" stroke="#10b981" stroke-width="1.4" />
+                <text x="391" y="255" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#6ee7b7">CARGO SCAN</text>
+
+                <!-- Upper Rear Stratospheric Observatory Deck -->
+                <path d="M 735 178 C 760 163, 815 163, 840 178 Z" fill="rgba(16,185,129,0.28)" stroke="#10b981" stroke-width="1.8" />
+                <text x="788" y="160" text-anchor="middle" font-family="JetBrains Mono" font-size="8.5" fill="#10b981">OBSERVATORY DECK</text>
+
+                <!-- Redundant Radiation Shielding Arrays -->
+                <rect x="612" y="182" width="12" height="84" rx="2" fill="rgba(16,185,129,0.3)" stroke="#10b981" stroke-width="1.5" />
+                <rect x="698" y="182" width="12" height="84" rx="2" fill="rgba(16,185,129,0.3)" stroke="#10b981" stroke-width="1.5" />
+
+                <!-- Aeroservoelastic Flutter Compensation (Tail Fin) -->
+                <path d="M 935 55 L 975 55 L 920 165 L 892 165 Z" fill="rgba(16,185,129,0.16)" stroke="#10b981" stroke-width="1.3" stroke-dasharray="4 3" />
+              </g>
+
+              <!-- ============================================================ -->
+              <!-- ELECTRIC LAYER (CYAN #00f0ff)                                -->
+              <!-- ============================================================ -->
+              <g class="sys-group sys-electric">
+                <!-- Extended Dorsal Solar Cell Array -->
+                <rect x="265" y="164" width="340" height="6" rx="2" fill="#00f0ff" filter="url(#neonGlow)" />
+                <text x="435" y="156" text-anchor="middle" font-family="JetBrains Mono" font-size="8.5" fill="#00f0ff">EXTENDED DORSAL SOLAR CELL ARRAY</text>
+
+                <!-- Forward & Aft Avionics Bays -->
+                <rect x="162" y="236" width="48" height="30" rx="3" fill="rgba(0,240,255,0.18)" stroke="#00f0ff" stroke-width="1.4" />
+                <rect x="216" y="236" width="52" height="30" rx="3" fill="rgba(0,240,255,0.18)" stroke="#00f0ff" stroke-width="1.4" />
+                <text x="215" y="254" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#67e8f9">DUAL AVIONICS</text>
+
+                <!-- High-Density Forward Battery Array -->
+                <g transform="translate(220, 184)">
+                  <rect x="0" y="0" width="145" height="42" rx="5" fill="rgba(0,240,255,0.16)" stroke="#00f0ff" stroke-width="1.8" />
+                  <!-- Individual Battery Cells -->
+                  <rect x="8" y="6" width="18" height="30" rx="2" fill="url(#batteryGrad)" opacity="0.85" />
+                  <rect x="31" y="6" width="18" height="30" rx="2" fill="url(#batteryGrad)" opacity="0.85" />
+                  <rect x="54" y="6" width="18" height="30" rx="2" fill="url(#batteryGrad)" opacity="0.85" />
+                  <rect x="77" y="6" width="18" height="30" rx="2" fill="url(#batteryGrad)" opacity="0.85" />
+                  <rect x="100" y="6" width="18" height="30" rx="2" fill="url(#batteryGrad)" opacity="0.85" />
+                  <rect x="123" y="6" width="14" height="30" rx="2" fill="url(#batteryGrad)" opacity="0.85" />
+                </g>
+
+                <!-- Main Electric Bus Spine -->
+                <path d="M 185 236 L 185 174 L 885 174 L 885 216" fill="none" stroke="#00f0ff" stroke-width="3" class="energy-flow" filter="url(#neonGlow)" />
+
+                <!-- Generator Output to Bus -->
+                <path d="M 795 205 L 795 174" fill="none" stroke="#00f0ff" stroke-width="2.5" class="energy-flow" />
+
+                <!-- Electric Superconducting Motor Unit & Rear Electric Fan -->
+                <rect x="855" y="210" width="52" height="32" rx="5" fill="rgba(0,240,255,0.28)" stroke="#00f0ff" stroke-width="2" />
+                <ellipse cx="922" cy="226" rx="10" ry="24" fill="rgba(0,240,255,0.2)" stroke="#00f0ff" stroke-width="2" />
+                <!-- Rear Electric Thrust Plume -->
+                <path d="M 936 218 L 1015 212 L 1005 226 L 1015 240 L 936 234 Z" fill="rgba(0,240,255,0.22)" stroke="#00f0ff" stroke-width="1.2" stroke-dasharray="4 3" />
+              </g>
+
+              <!-- ============================================================ -->
+              <!-- CONVENTIONAL FUEL LAYER (AMBER/GOLD #ffb800)                 -->
+              <!-- ============================================================ -->
+              <g class="sys-group sys-fuel">
+                <!-- Twin Cylindrical Jet A-1 Fuel Tanks -->
+                <rect x="380" y="184" width="122" height="44" rx="14" fill="url(#fuelTankGrad)" stroke="#fef08a" stroke-width="1.6" />
+                <rect x="508" y="186" width="66" height="40" rx="12" fill="url(#fuelTankGrad)" stroke="#fef08a" stroke-width="1.6" />
+                <text x="441" y="210" text-anchor="middle" font-family="JetBrains Mono" font-weight="700" font-size="9.5" fill="#070d19">JET A-1 TANKS</text>
+
+                <!-- Pressurized Fuel Lines to Wing Turbofan -->
+                <path d="M 475 228 L 475 292 L 535 322" fill="none" stroke="#ffb800" stroke-width="3.2" class="energy-flow" filter="url(#neonGlow)" />
+                <path d="M 540 226 L 540 285 L 665 342" fill="none" stroke="#ffb800" stroke-width="2.4" class="energy-flow" />
+              </g>
+
+              <!-- ============================================================ -->
+              <!-- NUCLEAR SMR LAYER (CRIMSON/ORANGE #ff3b30)                   -->
+              <!-- ============================================================ -->
+              <g class="sys-group sys-nuclear">
+                <!-- Air Condensers & Heat Exchanger (Steam Generator) -->
+                <rect x="582" y="188" width="24" height="68" rx="4" fill="rgba(255,59,48,0.22)" stroke="#ff3b30" stroke-width="1.6" />
+                <path d="M 588 195 Q 600 202 588 210 Q 600 218 588 226 Q 600 234 588 242" fill="none" stroke="#ff3b30" stroke-width="2" />
+
+                <!-- Lead/Steel Containment & Small Modular Liquid Metal Cooled Reactor (SMR) -->
+                <rect x="628" y="184" width="66" height="82" rx="14" fill="rgba(127,29,29,0.55)" stroke="#ff3b30" stroke-width="2.6" />
+                <rect x="642" y="196" width="38" height="58" rx="8" fill="url(#reactorCoreGrad)" stroke="#fca5a5" stroke-width="1.5" filter="url(#neonGlow)" />
+                <text x="661" y="228" text-anchor="middle" font-family="JetBrains Mono" font-weight="700" font-size="9" fill="#ffffff">SMR</text>
+
+                <!-- Closed-Brayton / Steam Turbine Loop -->
+                <path d="M 680 210 L 722 210" stroke="#ff3b30" stroke-width="3" class="energy-flow" />
+                <!-- Steam Turbine -->
+                <polygon points="722,196 762,204 762,232 722,240" fill="rgba(255,59,48,0.35)" stroke="#ff3b30" stroke-width="1.8" />
+                <!-- Generator -->
+                <rect x="772" y="202" width="44" height="32" rx="5" fill="rgba(0,240,255,0.25)" stroke="#00f0ff" stroke-width="1.8" />
+                <!-- Condenser Return Loop -->
+                <rect x="735" y="248" width="76" height="18" rx="3" fill="rgba(255,59,48,0.22)" stroke="#ff3b30" stroke-width="1.4" />
+                <path d="M 735 257 L 606 257 L 606 238" fill="none" stroke="#ff3b30" stroke-width="2.2" class="energy-flow" />
+              </g>
+
+              <!-- Foreground Starboard Swept Wing & Control Surfaces -->
+              <path d="M 445 256 L 765 375 L 825 368 L 575 256 Z" fill="#13223b" stroke="#64748b" stroke-width="2" />
+              <!-- Wing Fuel Reservoir Highlight -->
+              <path class="sys-group sys-fuel" d="M 480 264 L 710 348 L 735 344 L 545 264 Z" fill="rgba(255,184,0,0.38)" stroke="#ffb800" stroke-width="1.4" />
+              <!-- Wing Trailing-Edge Control Surfaces & Active De-Icing -->
+              <path class="sys-group sys-safety" d="M 595 264 L 815 362" stroke="#10b981" stroke-width="2.8" stroke-dasharray="6 3" />
+
+              <!-- Underwing Large Advanced Turbofan Engine (Variable-Area Nozzle + Ash Purging) -->
+              <g transform="translate(465, 300)">
+                <rect x="0" y="0" width="96" height="46" rx="10" fill="#0f172a" stroke="#94a3b8" stroke-width="2" />
+                <ellipse cx="4" cy="23" rx="8" ry="22" fill="#1e293b" stroke="#00f0ff" stroke-width="1.6" />
+                <!-- Variable-Area Exhaust Nozzle -->
+                <polygon points="96,6 124,12 124,34 96,40" fill="#1e293b" stroke="#ffb800" stroke-width="1.8" />
+                <!-- Turbofan Exhaust Thrust -->
+                <path d="M 128 15 L 185 10 L 176 23 L 185 36 L 128 31 Z" fill="rgba(255,184,0,0.24)" stroke="#ffb800" stroke-width="1.3" stroke-dasharray="4 3" />
+                <text x="48" y="26" text-anchor="middle" font-family="JetBrains Mono" font-size="8.5" fill="#fde68a">TURBOFAN</text>
+              </g>
+
+              <!-- ============================================================ -->
+              <!-- INTERACTIVE CLICKABLE HOTSPOTS (11 SUBSYSTEM NODES)          -->
+              <!-- ============================================================ -->
+              <g id="hotspot-layer">
+                <!-- 1. Collision Avoidance Array -->
+                <g class="hotspot cursor-pointer" data-id="collision" transform="translate(92, 232)">
+                  <circle r="13" fill="#10b981" opacity="0.3" class="hotspot-pulse" />
+                  <circle r="8" fill="#070d19" stroke="#10b981" stroke-width="2.5" />
+                  <text y="3" text-anchor="middle" font-family="JetBrains Mono" font-size="8" font-weight="700" fill="#10b981">01</text>
+                </g>
+
+                <!-- 2. Cockpit & Autonomous Ejection Seats -->
+                <g class="hotspot cursor-pointer" data-id="cockpit" transform="translate(144, 210)">
+                  <circle r="13" fill="#10b981" opacity="0.3" class="hotspot-pulse" />
+                  <circle r="8" fill="#070d19" stroke="#10b981" stroke-width="2.5" />
+                  <text y="3" text-anchor="middle" font-family="JetBrains Mono" font-size="8" font-weight="700" fill="#10b981">02</text>
+                </g>
+
+                <!-- 3. Dual Avionics & Lightning Grid -->
+                <g class="hotspot cursor-pointer" data-id="avionics" transform="translate(215, 252)">
+                  <circle r="13" fill="#00f0ff" opacity="0.3" class="hotspot-pulse" />
+                  <circle r="8" fill="#070d19" stroke="#00f0ff" stroke-width="2.5" />
+                  <text y="3" text-anchor="middle" font-family="JetBrains Mono" font-size="8" font-weight="700" fill="#00f0ff">03</text>
+                </g>
+
+                <!-- 4. Battery Array, Main Bus & Dorsal Solar -->
+                <g class="hotspot cursor-pointer" data-id="battery" transform="translate(292, 198)">
+                  <circle r="13" fill="#00f0ff" opacity="0.3" class="hotspot-pulse" />
+                  <circle r="8" fill="#070d19" stroke="#00f0ff" stroke-width="2.5" />
+                  <text y="3" text-anchor="middle" font-family="JetBrains Mono" font-size="8" font-weight="700" fill="#00f0ff">04</text>
+                </g>
+
+                <!-- 5. Amenities Bay & Multi-Spectrum Cargo Scanner -->
+                <g class="hotspot cursor-pointer" data-id="amenities" transform="translate(352, 252)">
+                  <circle r="13" fill="#10b981" opacity="0.3" class="hotspot-pulse" />
+                  <circle r="8" fill="#070d19" stroke="#10b981" stroke-width="2.5" />
+                  <text y="3" text-anchor="middle" font-family="JetBrains Mono" font-size="8" font-weight="700" fill="#10b981">05</text>
+                </g>
+
+                <!-- 6. Jet A-1 Fuel Tanks & Fuel Lines -->
+                <g class="hotspot cursor-pointer" data-id="fueltanks" transform="translate(465, 206)">
+                  <circle r="13" fill="#ffb800" opacity="0.3" class="hotspot-pulse" />
+                  <circle r="8" fill="#070d19" stroke="#ffb800" stroke-width="2.5" />
+                  <text y="3" text-anchor="middle" font-family="JetBrains Mono" font-size="8" font-weight="700" fill="#ffb800">06</text>
+                </g>
+
+                <!-- 7. Advanced Turbofan (Variable-Area Nozzle & Ash Purging) -->
+                <g class="hotspot cursor-pointer" data-id="turbofan" transform="translate(515, 322)">
+                  <circle r="13" fill="#ffb800" opacity="0.3" class="hotspot-pulse" />
+                  <circle r="8" fill="#070d19" stroke="#ffb800" stroke-width="2.5" />
+                  <text y="3" text-anchor="middle" font-family="JetBrains Mono" font-size="8" font-weight="700" fill="#ffb800">07</text>
+                </g>
+
+                <!-- 8. SMR Nuclear Reactor & Lead/Steel Containment -->
+                <g class="hotspot cursor-pointer" data-id="smr" transform="translate(661, 212)">
+                  <circle r="14" fill="#ff3b30" opacity="0.35" class="hotspot-pulse" />
+                  <circle r="9" fill="#070d19" stroke="#ff3b30" stroke-width="2.5" />
+                  <text y="3" text-anchor="middle" font-family="JetBrains Mono" font-size="8" font-weight="700" fill="#ff3b30">08</text>
+                </g>
+
+                <!-- 9. Steam Turbine, Generator & Heat Exchanger Loop -->
+                <g class="hotspot cursor-pointer" data-id="turbine" transform="translate(765, 218)">
+                  <circle r="13" fill="#ff3b30" opacity="0.3" class="hotspot-pulse" />
+                  <circle r="8" fill="#070d19" stroke="#ff3b30" stroke-width="2.5" />
+                  <text y="3" text-anchor="middle" font-family="JetBrains Mono" font-size="8" font-weight="700" fill="#ff3b30">09</text>
+                </g>
+
+                <!-- 10. Superconducting Motor & Rear Electric Fan -->
+                <g class="hotspot cursor-pointer" data-id="rearfan" transform="translate(892, 226)">
+                  <circle r="13" fill="#00f0ff" opacity="0.3" class="hotspot-pulse" />
+                  <circle r="8" fill="#070d19" stroke="#00f0ff" stroke-width="2.5" />
+                  <text y="3" text-anchor="middle" font-family="JetBrains Mono" font-size="8" font-weight="700" fill="#00f0ff">10</text>
+                </g>
+
+                <!-- 11. Observatory Deck, Control Surfaces & Flutter Compensation -->
+                <g class="hotspot cursor-pointer" data-id="observatory" transform="translate(795, 174)">
+                  <circle r="13" fill="#10b981" opacity="0.3" class="hotspot-pulse" />
+                  <circle r="8" fill="#070d19" stroke="#10b981" stroke-width="2.5" />
+                  <text y="3" text-anchor="middle" font-family="JetBrains Mono" font-size="8" font-weight="700" fill="#10b981">11</text>
+                </g>
+              </g>
+            </svg>
+          </div>
+
+          <!-- Quick Hotspot Selector Pills below SVG -->
+          <div class="relative z-10 mt-3 pt-3 border-t border-slate-800/80 flex flex-wrap gap-1.5" id="hotspot-pills">
+            <!-- Populated dynamically via JS -->
+          </div>
+        </div>
+
+        <!-- Subsystem Technical Inspection Card (4 cols on xl) -->
+        <aside class="xl:col-span-4 glass-panel rounded-2xl p-5 flex flex-col justify-between border-t-2 border-cyan-400/50" id="inspector-card">
+          <div class="space-y-4">
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <span id="insp-badge" class="inline-block px-2.5 py-0.5 rounded text-[11px] font-mono font-bold uppercase tracking-wider bg-red-500/20 text-nuclear border border-red-500/40">
+                  NUCLEAR SMR SUBSYSTEM
+                </span>
+                <h3 id="insp-title" class="text-lg font-extrabold text-white mt-1.5 leading-snug">
+                  Small Modular Liquid Metal Cooled Reactor (SMR)
+                </h3>
+                <p id="insp-code" class="text-xs font-mono text-slate-400">NODE 08 • AFT CONTAINMENT BAY</p>
+              </div>
+            </div>
+
+            <p id="insp-summary" class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+              Liquid-metal cooled fission core encased in heavy lead/steel containment and redundant radiation shielding arrays. Supplies continuous thermal energy for high-altitude cruise and optional closed-Brayton cycle operation.
+            </p>
+
+            <!-- Multi-Condition Behavior Cards -->
+            <div class="space-y-2.5">
+              <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3">
+                <div class="text-[11px] font-mono font-bold text-cyan-400 uppercase mb-1">Baseline &amp; Density Response</div>
+                <p id="insp-normal" class="text-xs text-slate-300 leading-relaxed"></p>
+              </div>
+
+              <div class="bg-red-950/25 border border-red-500/30 rounded-xl p-3">
+                <div class="text-[11px] font-mono font-bold text-red-400 uppercase mb-1">Adverse Weather &amp; Threat Stress</div>
+                <p id="insp-adverse" class="text-xs text-slate-300 leading-relaxed"></p>
+              </div>
+
+              <div class="bg-emerald-950/25 border border-emerald-500/30 rounded-xl p-3">
+                <div class="text-[11px] font-mono font-bold text-emerald-400 uppercase mb-1">Favorable &amp; Counter-Mitigation Upgrade</div>
+                <p id="insp-favorable" class="text-xs text-slate-300 leading-relaxed"></p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs font-mono text-slate-400">
+            <span>STATUS: <strong class="text-emerald-400">ONLINE / VERIFIED</strong></span>
+            <button onclick="switchTab('failures')" class="text-cyan-400 hover:text-cyan-300 underline">
+              View Failure Matrix →
+            </button>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- VIEW 2: SCENARIO SIMULATOR (6 OPERATIONAL PROFILES)                   -->
+    <!-- ===================================================================== -->
+    <section id="view-scenarios" class="hidden space-y-6">
+      <div class="glass-panel rounded-2xl p-5">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+          <div>
+            <h2 class="text-lg font-bold text-white">Scenario Simulator — 6 Operational Flight Profiles</h2>
+            <p class="text-xs text-slate-400">Select any of the 6 documented operational profiles to synchronize telemetry, zone diagnostics, and system configurations.</p>
+          </div>
+          <button onclick="switchTab('schematic')" class="px-3 py-1.5 rounded-lg text-xs font-mono font-semibold bg-cyan-500/15 text-electric border border-cyan-400/40 hover:bg-cyan-500/25 transition self-start">
+            Inspect on Cutaway Schematic →
+          </button>
+        </div>
+
+        <!-- 6 Scenario Selector Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" id="scenario-cards-grid">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
+
+      <!-- Active Scenario Detailed Breakdown & Interactive Controls -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Left: Interactive Controls (Density Slider or 5-Zone Selector) -->
+        <div class="lg:col-span-7 glass-panel rounded-2xl p-5 space-y-5">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div>
+              <span id="scen-detail-tag" class="text-[11px] font-mono uppercase tracking-wider text-electric">SCENARIO 01</span>
+              <h3 id="scen-detail-title" class="text-xl font-bold text-white">Base Cross-Section Design (Standard Profile)</h3>
+            </div>
+          </div>
+
+          <p id="scen-detail-desc" class="text-sm text-slate-300 leading-relaxed"></p>
+
+          <!-- Interactive Module A: Global Air Density & Latitude Simulator (Shown for Scenario 2 & All) -->
+          <div id="density-simulator-box" class="bg-slate-900/90 border border-cyan-500/30 rounded-xl p-4 space-y-4">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-mono font-bold text-electric uppercase">Atmospheric Altitude &amp; Latitude Simulator</span>
+              <span id="sim-layer-badge" class="px-2 py-0.5 rounded text-[11px] font-mono bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">STRATOSPHERE</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <div class="flex justify-between text-xs font-mono mb-1">
+                  <span class="text-slate-400">ALTITUDE</span>
+                  <span id="sim-alt-val" class="text-white font-bold">45,000 ft</span>
+                </div>
+                <input type="range" id="sim-alt-slider" min="0" max="120000" step="5000" value="45000" class="w-full" oninput="updateAtmosphereSim()" />
+                <div class="flex justify-between text-[10px] font-mono text-slate-500 mt-1">
+                  <span>Sea Level (0 ft)</span>
+                  <span>60k ft</span>
+                  <span>Mesosphere (120k ft)</span>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-xs font-mono mb-1">
+                  <span class="text-slate-400">LATITUDE BAND</span>
+                  <span id="sim-lat-val" class="text-white font-bold">45° MID-LATITUDE</span>
+                </div>
+                <input type="range" id="sim-lat-slider" min="0" max="90" step="15" value="45" class="w-full" oninput="updateAtmosphereSim()" />
+                <div class="flex justify-between text-[10px] font-mono text-slate-500 mt-1">
+                  <span>0° Equator</span>
+                  <span>45° Temperate</span>
+                  <span>90° Polar</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Live Calculated Atmospheric & Propulsion Outputs -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-800 text-xs font-mono">
+              <div class="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800">
+                <div class="text-[10px] text-slate-400">AIR DENSITY (ρ)</div>
+                <div id="sim-rho-out" class="text-amber-300 font-bold mt-0.5">0.24 kg/m³</div>
+              </div>
+              <div class="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800">
+                <div class="text-[10px] text-slate-400">AMBIENT TEMP</div>
+                <div id="sim-temp-out" class="text-cyan-300 font-bold mt-0.5">-56.5°C</div>
+              </div>
+              <div class="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800">
+                <div class="text-[10px] text-slate-400">TURBOFAN NOZZLE</div>
+                <div id="sim-nozzle-out" class="text-fuel font-bold mt-0.5">EXPANDED (THIN AIR)</div>
+              </div>
+              <div class="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800">
+                <div class="text-[10px] text-slate-400">SMR THERMAL CYCLE</div>
+                <div id="sim-brayton-out" class="text-nuclear font-bold mt-0.5">STEAM / BRAYTON HYBRID</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Interactive Module B: 5-Zone Breakdown Grid -->
+          <div id="zones-container" class="space-y-2.5">
+            <div class="text-xs font-mono font-bold text-slate-300 uppercase">5-Zone Flight Corridor Telemetry &amp; System Responses</div>
+            <div id="zones-list" class="grid grid-cols-1 gap-2.5">
+              <!-- Populated dynamically via JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Subsystem Allocation & Callout Summary -->
+        <div class="lg:col-span-5 glass-panel rounded-2xl p-5 space-y-4">
+          <h3 class="text-sm font-mono font-bold uppercase tracking-wider text-white border-b border-slate-800 pb-2.5">
+            Scenario Architecture &amp; Verbatim Callouts
+          </h3>
+
+          <div class="space-y-3 text-xs">
+            <div class="p-3 rounded-xl bg-cyan-950/20 border border-cyan-500/30">
+              <div class="font-mono font-bold text-electric mb-1">⚡ ELECTRIC SUBSYSTEM</div>
+              <p id="scen-electric-text" class="text-slate-300 leading-relaxed"></p>
+            </div>
+            <div class="p-3 rounded-xl bg-amber-950/20 border border-amber-500/30">
+              <div class="font-mono font-bold text-fuel mb-1">🔥 CONVENTIONAL JET A-1 FUEL</div>
+              <p id="scen-fuel-text" class="text-slate-300 leading-relaxed"></p>
+            </div>
+            <div class="p-3 rounded-xl bg-red-950/20 border border-red-500/30">
+              <div class="font-mono font-bold text-nuclear mb-1">☢️ NUCLEAR SMR &amp; THERMAL LOOP</div>
+              <p id="scen-nuclear-text" class="text-slate-300 leading-relaxed"></p>
+            </div>
+            <div class="p-3 rounded-xl bg-emerald-950/20 border border-emerald-500/30">
+              <div class="font-mono font-bold text-safety mb-1">🛡️ SAFETY, CABIN &amp; COUNTER-MITIGATION</div>
+              <p id="scen-safety-text" class="text-slate-300 leading-relaxed"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- VIEW 3: FAILURE SCENARIOS & COUNTER-MITIGATION MATRIX                 -->
+    <!-- ===================================================================== -->
+    <section id="view-failures" class="hidden space-y-6">
+      <div class="glass-panel rounded-2xl p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h2 class="text-lg font-bold text-white">Failure Scenarios &amp; Counter-Mitigation Matrix</h2>
+          <p class="text-xs text-slate-400">
+            Diagnostic pairing of all 6 catastrophic/adverse failure modes with automated Aurora H-3 counter-protection architectures. Click <strong class="text-emerald-400">"Test Mitigation"</strong> to run a live subsystem response simulation.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <input type="text" id="failure-search" oninput="renderFailureCards()" placeholder="Filter threats or counter-systems..."
+                 class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 w-full sm:w-64" />
+        </div>
+      </div>
+
+      <!-- Live Mitigation Diagnostic Console Banner -->
+      <div id="mitigation-console" class="hidden glass-panel rounded-2xl p-4 border-l-4 border-emerald-400 bg-emerald-950/20">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 text-[10px] font-mono font-bold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 rounded">
+                ACTIVE COUNTER-MEASURE TEST
+              </span>
+              <span id="console-title" class="text-sm font-bold text-white"></span>
+            </div>
+            <p id="console-log" class="text-xs font-mono text-emerald-200"></p>
+          </div>
+          <button onclick="document.getElementById('mitigation-console').classList.add('hidden')" class="text-xs font-mono text-slate-400 hover:text-white self-end sm:self-center">
+            [DISMISS]
+          </button>
+        </div>
+      </div>
+
+      <!-- 6 Failure Scenario Cards Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5" id="failure-cards-grid">
+        <!-- Populated dynamically via JS -->
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- VIEW 4: MASTER SPECIFICATION TABLE & DOCUMENTATION EXPORT             -->
+    <!-- ===================================================================== -->
+    <section id="view-docs" class="hidden space-y-6">
+      <div class="glass-panel rounded-2xl p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h2 class="text-lg font-bold text-white">Master Scenario Comparison Table &amp; Technical Specification</h2>
+          <p class="text-xs text-slate-400">
+            Complete word-by-word engineering tabularization across all 6 scenarios, flight environments, propulsion responses, and safety upgrades.
+          </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 no-print">
+          <input type="text" id="table-search" oninput="renderMasterTable()" placeholder="Search specification table..."
+                 class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 w-48 sm:w-60" />
+          <select id="table-filter" onchange="renderMasterTable()" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-400">
+            <option value="all">All 6 Scenarios</option>
+            <option value="1">1. Base Cross-Section</option>
+            <option value="2">2. Global Air Density</option>
+            <option value="3">3. Adverse Weather (5 Zones)</option>
+            <option value="4">4. Favorable Weather (5 Zones)</option>
+            <option value="5">5. Upgraded Safety &amp; Journey</option>
+            <option value="6">6. Integrated Counter-Protection</option>
+          </select>
+          <button onclick="window.print()" class="px-3.5 py-2 rounded-lg text-xs font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 hover:bg-emerald-500/30 transition flex items-center gap-1.5">
+            <span>🖨️ EXPORT / PRINT SPEC</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Responsive Master Table -->
+      <div class="glass-panel rounded-2xl overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-900/95 border-b border-slate-700 font-mono text-[11px] uppercase text-cyan-300">
+                <th class="p-4 w-48">Scenario / Profile</th>
+                <th class="p-4 w-64">Atmospheric &amp; Flight Conditions</th>
+                <th class="p-4 w-72">Power &amp; Propulsion System Behavior</th>
+                <th class="p-4 w-72">Safety, Environmental &amp; Passenger Features</th>
+              </tr>
+            </thead>
+            <tbody id="master-table-body" class="divide-y divide-slate-800/90 text-slate-300">
+              <!-- Populated dynamically via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800/80 bg-[#060b15] px-4 sm:px-6 py-4 text-xs text-slate-500 font-mono">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+      <span>AURORA H-3 HYBRID // TRI-HYBRID AEROSPACE ENGINEERING SPECIFICATION</span>
+      <span>ELECTRIC • JET A-1 • LIQUID-METAL SMR • INTEGRATED THREAT MITIGATION</span>
+    </div>
+  </footer>
+
+  <!-- ===================================================================== -->
+  <!-- APPLICATION DATA & INTERACTIVE LOGIC                                  -->
+  <!-- ===================================================================== -->
+  <script>
+    // 1. SUBSYSTEM HOTSPOTS DATA (11 NODES ON THE CUTAWAY SCHEMATIC)
+    const SUBSYSTEMS = [
+      {
+        id: 'collision',
+        num: '01',
+        name: 'Collision Avoidance Array (AESA Radar & LiDAR)',
+        category: 'safety',
+        badge: 'SAFETY & SENSOR SUITE',
+        code: 'NODE 01 • NOSE RADOME',
+        summary: 'Forward nose-mounted multi-spectral sensor array combining Active Electronically Scanned Array (AESA) Radar and high-resolution LiDAR for long-range obstacle, weather cell, volcanic ash plume, and hypersonic/stratospheric traffic detection.',
+        normal: 'Maintains 360° forward hemispherical scan and terrain-following telemetry across Tropospheric and Stratospheric flight corridors.',
+        adverse: 'Detects supercooled large droplet (SLD) cells, extreme wind shear boundaries, and volcanic ash particulates prior to ingestion.',
+        favorable: 'Integrates with Zone 1 Weather & Threat Mitigation to plot laminar, low-drag stratospheric trajectories up to 120,000 ft.'
+      },
+      {
+        id: 'cockpit',
+        num: '02',
+        name: 'Cockpit & Autonomous Ejection Seats (Pilots)',
+        category: 'safety',
+        badge: 'CREW PROTECTION',
+        code: 'NODE 02 • FORWARD FLIGHT DECK',
+        summary: 'Pressurized flight deck fitted with fly-by-light avionics and autonomous pilot ejection seats engineered for rapid crew extraction during unrecoverable flight emergencies.',
+        normal: 'Provides unified tri-hybrid energy management (Electric, Fuel, Nuclear SMR) and real-time density/lift instrumentation.',
+        adverse: 'Shielded against high-energy lightning surges and extreme polar cold (-80°C) with automated emergency ejection readiness.',
+        favorable: 'Operates in automated cruise supervision mode during steady, vibration-free electric propulsion segments.'
+      },
+      {
+        id: 'avionics',
+        num: '03',
+        name: 'Dual Avionics Bays & Lightning Dissipation Grid',
+        category: 'electric',
+        badge: 'AVIONICS & SURGE PROTECTION',
+        code: 'NODE 03 • LOWER FORWARD HULL',
+        summary: 'Redundant lower-deck avionics bays paired with a forward lightning attachment and extreme wind dissipation system that routes high-energy atmospheric discharges safely around the airframe.',
+        normal: 'Executes continuous flight-control laws, tri-hybrid load balancing, and Environmental Control System (ECS) feedback loops.',
+        adverse: 'In Zone 1 lightning strikes and extreme wind shear, Faraday-coupled conductive pathways divert multi-megaampere surges away from core processors.',
+        favorable: 'Maintains ultra-low latency active laminar flow control and precise cabin CO2, humidity, and temperature regulation.'
+      },
+      {
+        id: 'battery',
+        num: '04',
+        name: 'Battery Array, Main Bus & Extended Dorsal Solar Array',
+        category: 'electric',
+        badge: 'ELECTRIC ENERGY STORAGE & HARVEST',
+        code: 'NODE 04 • UPPER FORWARD & DORSAL SPINE',
+        summary: 'High-density solid-state battery array linked to the dorsal Main Bus and an Extended Solar Cell Array spanning the upper fuselage spine.',
+        normal: 'Supplies peak takeoff power, transient load leveling, and direct DC distribution to the rear superconducting propulsion unit.',
+        adverse: 'Acts as an isolated emergency power reserve if turbofan engines experience volcanic ash ingestion or fuel-line icing.',
+        favorable: 'In Zone 1 Clear Atmosphere (minimal solar shielding loss), the Extended Solar Cell Array continuously charges the battery bank for cruise optimization.'
+      },
+      {
+        id: 'amenities',
+        num: '05',
+        name: 'Journey-Specific Amenities Bay & Multi-Spectrum Cargo Scanner',
+        category: 'safety',
+        badge: 'PASSENGER & CARGO SECURITY',
+        code: 'NODE 05 • MID-LOWER DECK',
+        summary: 'Dedicated mid-fuselage lower deck housing a passenger lounge and wellness pod alongside an automated Multi-Spectrum Cargo Scanner monitoring the lower cargo hold.',
+        normal: 'Supports long-endurance intercontinental missions with ergonomic passenger recovery zones and balanced cargo weight distribution.',
+        adverse: 'Multi-Spectrum Cargo Scanner continuously screens containerized freight for thermal, chemical, or radiological anomalies.',
+        favorable: 'Delivers a luxury wellness environment supported by Zone 2 Environmental Control System (perfect CO2, humidity, and temperature).'
+      },
+      {
+        id: 'fueltanks',
+        num: '06',
+        name: 'Jet A-1 Fuel Tanks & Pressurized Wing Fuel Lines',
+        category: 'fuel',
+        badge: 'CONVENTIONAL FUEL STORAGE',
+        code: 'NODE 06 • CENTRAL FUSELAGE BAY',
+        summary: 'Twin high-capacity central fuselage Jet A-1 fuel tanks feeding pressurized wing-routed fuel lines into the underwing advanced turbofan engines.',
+        normal: 'Provides high thrust-to-weight chemical energy for dense-air climb (Sea Level 1.2 kg/m³) and heavy payload acceleration.',
+        adverse: 'Heated fuel-line routing prevents cold-soak waxing at -80°C polar stratospheric ambient temperatures.',
+        favorable: 'Enables Zone 3 clean-burn optimal fuel injection and combustion with zero atmospheric contaminant fouling.'
+      },
+      {
+        id: 'turbofan',
+        num: '07',
+        name: 'Large Advanced Turbofan Engines (Variable-Area Nozzle & Ash Purging)',
+        category: 'fuel',
+        badge: 'AIR-BREATHING PROPULSION',
+        code: 'NODE 07 • UNDERWING NACELLES',
+        summary: 'High-bypass underwing turbofan engines equipped with variable-area exhaust nozzles for thin air and integrated volcanic ash detection and filter purging.',
+        normal: 'Adjusts variable-area nozzle geometry dynamically from high-density sea-level air (1.2 kg/m³) to rarefied upper-tropospheric layers.',
+        adverse: 'In Zone 3 Volcanic Ash clouds, integrated particulate sensors trigger automated filter purging cycles (Ash Filter Status: OK) to prevent core erosion and clogging.',
+        favorable: 'Achieves peak clean-burn thermodynamic efficiency in particulate-free air alongside nuclear cogeneration.'
+      },
+      {
+        id: 'smr',
+        num: '08',
+        name: 'Small Modular Liquid Metal Cooled Reactor (SMR) & Shielding',
+        category: 'nuclear',
+        badge: 'NUCLEAR FISSION CORE',
+        code: 'NODE 08 • AFT CONTAINMENT BAY',
+        summary: 'Compact liquid-metal cooled fission reactor enclosed within multi-layer Lead/Steel Containment and Redundant Radiation Shielding Arrays.',
+        normal: 'Generates continuous, zero-carbon baseload thermal power for virtually unlimited global range without refueling.',
+        adverse: 'Lead/Steel containment plus Redundant Shielding Arrays isolate internal reactor flux and protect occupants from Zone 5 high cosmic radiation at 110,000–120,000 ft.',
+        favorable: 'Supports an optional Closed-Brayton Cycle at high stratospheric altitudes for maximum thermal-to-electric conversion efficiency.'
+      },
+      {
+        id: 'turbine',
+        num: '09',
+        name: 'Heat Exchanger, Steam Turbine, Generator & Air Condensers',
+        category: 'nuclear',
+        badge: 'THERMAL-TO-ELECTRIC CONVERSION',
+        code: 'NODE 09 • AFT POWER CONVERSION BAY',
+        summary: 'Closed-loop thermal conversion train comprising a liquid-metal Heat Exchanger (Steam Generator), High-Tension lines, Steam Turbine, Generator, Air Condensers, and Condenser.',
+        normal: 'Converts reactor thermal output into high-voltage electrical power fed directly into the dorsal Main Bus and rear electric motor.',
+        adverse: 'Utilizes extreme cold ambient air (-80°C) at high altitude to boost condenser heat rejection and thermodynamic cycle efficiency.',
+        favorable: 'Operates in seamless nuclear cogeneration mode during Zone 3 and Zone 4 steady cruise.'
+      },
+      {
+        id: 'rearfan',
+        num: '10',
+        name: 'Electric Superconducting Motor Unit & Rear Electric Fan',
+        category: 'electric',
+        badge: 'BOUNDARY-LAYER ELECTRIC PROPULSION',
+        code: 'NODE 10 • TAILCONE PROPULSOR',
+        summary: 'Cryogenically cooled electric superconducting motor unit driving an aft-fuselage boundary-layer-ingesting rear electric fan.',
+        normal: 'Ingests slow-moving fuselage boundary-layer air to re-energize the wake, substantially reducing overall airframe drag.',
+        adverse: 'Provides independent non-air-breathing thrust redundancy if wing turbofans are throttled back during severe volcanic ash encounters.',
+        favorable: 'Delivers Zone 4 steady, silent, vibration-free electric propulsion and active laminar flow stabilization.'
+      },
+      {
+        id: 'observatory',
+        num: '11',
+        name: 'Stratospheric Observatory Deck, Control Surfaces & Flutter Damping',
+        category: 'safety',
+        badge: 'AERODYNAMICS & OBSERVATION',
+        code: 'NODE 11 • UPPER AFT HULL & EMPENNAGE',
+        summary: 'Panoramic upper-aft Stratospheric Observatory Deck paired with active de-icing wing control surfaces and Aeroservoelastic Flutter Compensation.',
+        normal: 'Articulated wing and tail control surfaces maintain precision trim across subsonic and high-altitude stratospheric flight regimes.',
+        adverse: 'Aeroservoelastic Flutter Compensation actively damps mechanical stress from Zone 4 gravity waves and Zone 1 extreme wind shear, while Active De-Icing clears Zone 2 SLD ice.',
+        favorable: 'Offers passengers unobstructed panoramic views of Earth’s curvature and aurora borealis at 120,000 ft in pure, low-drag air.'
+      }
+    ];
+
+    // 2. SIX OPERATIONAL SCENARIOS DATA
+    const SCENARIOS = [
+      {
+        id: 1,
+        shortTitle: '1. Base Cross-Section Design',
+        title: 'Scenario 1: Base Cross-Section Design (Standard Profile)',
+        tag: 'BASELINE ARCHITECTURE • 90m / 120m',
+        hudProfile: 'SCENARIO 1: BASELINE',
+        hudAlt: '45,000 ft • STRATOSPHERE',
+        hudDensity: '0.24 kg/m³ • -56.5°C',
+        hudPower: 'E:35% | F:35% | N:30%',
+        hudFilters: 'ASH: OK • ICE: STANDBY',
+        hudShield: 'LEAD/STEEL CONTAINMENT',
+        atmosphereCss: 'radial-gradient(circle at 25% 30%, rgba(0, 240, 255, 0.16), transparent 55%), radial-gradient(circle at 75% 70%, rgba(255, 184, 0, 0.14), transparent 55%)',
+        desc: 'The foundational tri-hybrid cross-sectional architecture of the Aurora H-3 Hybrid under standard high-altitude flight conditions, integrating forward electric storage, central Jet A-1 chemical fuel tanks, and an aft liquid-metal cooled Small Modular Reactor (SMR).',
+        electricText: 'Battery Array, Main Bus, Electric Superconducting Motor Unit driving the Rear Electric Fan, supplemented by the reactor-driven Generator.',
+        fuelText: 'Central Jet A-1 Fuel Tanks feeding pressurized wing Fuel Lines into Large Advanced Turbofan Engines.',
+        nuclearText: 'Small Modular Liquid Metal Cooled Reactor (SMR) with Heat Exchanger (Steam Generator), Steam Turbine, Generator, Air Condensers, and Condenser.',
+        safetyText: 'Lead/Steel Containment and Shielding around the SMR; forward Cockpit, dual Avionics bays, passenger cabin, and lower Cargo Hold (90 m fuselage / 120 m span reference).',
+        showDensitySim: false,
+        zones: [
+          { name: 'Forward Section (0–30m)', status: 'NOMINAL', color: 'cyan', detail: 'Cockpit, Dual Avionics Bays, Multi-Row Passenger Cabin, Upper Battery Array, and Lower Cargo Hold.' },
+          { name: 'Center Section (30–55m)', status: 'NOMINAL', color: 'amber', detail: 'Twin Jet A-1 Fuel Tanks, Wing Box, Fuel Lines, and Underwing Large Advanced Turbofan Engines.' },
+          { name: 'Aft Section (55–90m)', status: 'NOMINAL', color: 'red', detail: 'SMR in Lead/Steel Containment, Heat Exchanger, Steam Turbine, Generator, Condensers, and Rear Electric Fan.' }
+        ]
+      },
+      {
+        id: 2,
+        shortTitle: '2. Global Air Density Management',
+        title: 'Scenario 2: Global Air Density Management (Equator to Polar)',
+        tag: 'ATMOSPHERIC GRADIENT • SL 1.2 kg/m³ TO MESOSPHERE',
+        hudProfile: 'SCENARIO 2: DENSITY MGMT',
+        hudAlt: '85,000 ft • STRATOSPHERE',
+        hudDensity: '0.036 kg/m³ • -68.0°C',
+        hudPower: 'E:40% | F:20% | N:40%',
+        hudFilters: 'NOZZLE: THIN-AIR EXPANDED',
+        hudShield: 'CLOSED-BRAYTON ACTIVE',
+        atmosphereCss: 'linear-gradient(180deg, rgba(15, 23, 42, 0.7) 0%, rgba(2, 132, 199, 0.22) 55%, rgba(217, 119, 6, 0.22) 100%)',
+        desc: 'Demonstrates continuous lift and propulsion adaptation as the Aurora H-3 ascends from dense sea-level air (1.2 kg/m³) through the Troposphere, Stratosphere, and lower Mesosphere across Equatorial-to-Polar latitude gradients.',
+        electricText: 'Rear Electric Fan compensates for reduced turbofan mass-flow in rarefied stratospheric air using continuous SMR electrical output.',
+        fuelText: 'Turbofan Variable-Area Nozzle Optimized for Thin Air dynamically expands exhaust geometry to sustain specific impulse at high altitude.',
+        nuclearText: 'SMR engages optional Closed-Brayton Cycle for high-altitude efficiency alongside the primary liquid-metal thermal conversion loop.',
+        safetyText: 'Continuous lift and density management across global atmospheric pressure and temperature gradients.',
+        showDensitySim: true,
+        zones: [
+          { name: 'Troposphere (Sea Level • 1.2 kg/m³)', status: 'HIGH DENSITY', color: 'amber', detail: 'Maximum aerodynamic lift and turbofan mass flow; variable-area nozzle set to high-pressure climb profile.' },
+          { name: 'Stratosphere (50,000–100,000 ft)', status: 'LOW DENSITY', color: 'cyan', detail: 'Variable-Area Nozzle expands for thin air; SMR Closed-Brayton Cycle maximizes thermal-to-electric efficiency.' },
+          { name: 'Mesosphere Transition (110,000–120,000 ft)', status: 'ULTRA-THIN AIR', color: 'red', detail: 'Ultra-low drag cruise dominated by SMR nuclear-electric rear fan propulsion across Equator-to-Polar latitudes.' }
+        ]
+      },
+      {
+        id: 3,
+        shortTitle: '3. Adverse Weather (5 Zones)',
+        title: 'Scenario 3: Adverse Weather & Extreme Atmospheric Conditions',
+        tag: '5-ZONE STRESS PROFILE • SEVERE HAZARDS',
+        hudProfile: 'SCENARIO 3: ADVERSE WX',
+        hudAlt: '110,000 ft • POLAR / MESO',
+        hudDensity: '0.011 kg/m³ • -80.0°C',
+        hudPower: 'E:45% | F:15% | N:40%',
+        hudFilters: 'ASH ALERT • SLD ANTI-ICE',
+        hudShield: 'HIGH COSMIC FLUX (-80°C)',
+        atmosphereCss: 'linear-gradient(90deg, rgba(148,163,184,0.22) 0%, rgba(56,189,248,0.18) 25%, rgba(120,113,108,0.3) 50%, rgba(99,102,241,0.22) 75%, rgba(16,185,129,0.22) 100%)',
+        desc: 'Evaluates system stress and automated survival responses across five consecutive extreme environments: lightning & shear, severe SLD icing, volcanic ash plumes, gravity-wave turbulence, and polar stratospheric cold (-80°C) with high cosmic radiation.',
+        electricText: 'Lightning Attachment & Extreme Wind Systems safely route multi-megaampere electrical discharges through the fuselage bus without avionics upset.',
+        fuelText: 'Zone 3 Volcanic Ash interaction threatens turbofan core erosion and filter clogging, prompting power shift toward SMR-electric propulsion.',
+        nuclearText: 'SMR maintains uninterrupted power in oxygen-poor ash plumes and utilizes -80°C polar ambient temperatures for high condenser efficiency.',
+        safetyText: 'Zone 2 SLD Ice Detection & Mitigation, Zone 4 Gravity Wave Mechanical Stress Analysis, and Lead/Steel Containment against high cosmic flux.',
+        showDensitySim: false,
+        zones: [
+          { name: 'Zone 1: High-Energy Electrical & Extreme Shear', status: 'LIGHTNING STRIKE', color: 'cyan', detail: 'Lightning Attachment & Extreme Wind Systems channel high-energy discharges safely across the airframe.' },
+          { name: 'Zone 2: Severe SLD Icing', status: 'ACTIVE ICING', color: 'cyan', detail: 'Supercooled Large Droplet (SLD) Ice Detection & Mitigation System activates thermal/electrical anti-icing.' },
+          { name: 'Zone 3: Volcanic Ash Interaction', status: 'FILTER STRESS', color: 'amber', detail: 'Volcanic ash cloud causes engine degradation and filter clogging stress on underwing turbofans.' },
+          { name: 'Zone 4: Severe Turbulence & Gravity Waves', status: 'HIGH STRESS', color: 'red', detail: 'Mesospheric gravity waves induce severe mechanical loads monitored by structural stress analysis.' },
+          { name: 'Zone 5: Polar Cold (-80°C) & Cosmic Flux', status: '110,000 FT / PSC', color: 'emerald', detail: 'Polar Stratospheric Cloud (PSC) interaction, -80°C ambient cold, and elevated cosmic radiation flux.' }
+        ]
+      },
+      {
+        id: 4,
+        shortTitle: '4. Favorable Weather (5 Zones)',
+        title: 'Scenario 4: Favorable Weather & Pleasant Atmospheric Conditions',
+        tag: '5-ZONE OPTIMAL EFFICIENCY • 120,000 FT',
+        hudProfile: 'SCENARIO 4: FAVORABLE WX',
+        hudAlt: '120,000 ft • STRATOSPHERE',
+        hudDensity: '0.007 kg/m³ • PURE AIR',
+        hudPower: 'E:50% | F:20% | N:30%',
+        hudFilters: 'CLEAN BURN • LAMINAR FLOW',
+        hudShield: 'MINIMAL SOLAR LOSS',
+        atmosphereCss: 'linear-gradient(90deg, rgba(251,191,36,0.22) 0%, rgba(56,189,248,0.18) 35%, rgba(14,165,233,0.22) 70%, rgba(248,250,252,0.18) 100%)',
+        desc: 'Demonstrates peak thermodynamic, aerodynamic, and cabin comfort performance across five benign atmospheric zones—maximizing solar harvesting, clean-burn combustion, silent electric propulsion, and ultra-low drag at 120,000 ft.',
+        electricText: 'Zone 1 High-Efficiency Solar Energy Harvest charges the Battery Array with minimal solar shielding loss, powering Zone 4 silent, vibration-free electric propulsion.',
+        fuelText: 'Zone 3 Optimal Fuel Injection & Combustion operates in clean, contaminant-free air with zero particulate fouling.',
+        nuclearText: 'SMR operates in high-efficiency nuclear cogeneration mode, supplying steady baseload electricity and cabin thermal conditioning.',
+        safetyText: 'Zone 2 Integrated Cabin Anti-Icing and Environmental Control System (ECS) maintain ideal CO2, humidity, and temperature.',
+        showDensitySim: false,
+        zones: [
+          { name: 'Zone 1: Clear Atmosphere & Solar Harvest', status: 'MAX SOLAR', color: 'amber', detail: 'Minimal solar shielding loss enables high-efficiency solar energy harvest and battery charging optimization.' },
+          { name: 'Zone 2: Optimal Anti-Icing & Cabin Comfort', status: 'IDEAL ECS', color: 'emerald', detail: 'Environmental Control System maintains perfect CO2, humidity, and temperature with integrated anti-icing.' },
+          { name: 'Zone 3: Clean-Burn Turbofan & Nuclear Cogeneration', status: 'ZERO FOULING', color: 'amber', detail: 'Optimal fuel injection and combustion with nuclear cogeneration efficiency in pure air.' },
+          { name: 'Zone 4: Steady, Silent Electric Propulsion', status: 'LAMINAR FLOW', color: 'cyan', detail: 'Vibration-free rear electric fan propulsion paired with smooth laminar boundary-layer airflow.' },
+          { name: 'Zone 5: Stratospheric Altitude & Drag Reduction', status: '120,000 FT', color: 'cyan', detail: 'Pure air and ultra-low aerodynamic drag at 120,000 ft ceiling for maximum global range.' }
+        ]
+      },
+      {
+        id: 5,
+        shortTitle: '5. Upgraded Safety & Journey Features',
+        title: 'Scenario 5: Upgraded Safety & Positive-Condition Journey Features',
+        tag: 'CREW ESCAPE • AESA/LiDAR • OBSERVATORY',
+        hudProfile: 'SCENARIO 5: UPGRADED UX',
+        hudAlt: '120,000 ft • STRATOSPHERE',
+        hudDensity: '0.007 kg/m³ • LOW DRAG',
+        hudPower: 'E:55% | F:15% | N:30%',
+        hudFilters: 'AESA/LiDAR • SOLAR EXTENDED',
+        hudShield: 'EJECTION SEATS ARMED',
+        atmosphereCss: 'radial-gradient(circle at 18% 35%, rgba(16, 185, 129, 0.2), transparent 50%), radial-gradient(circle at 82% 25%, rgba(0, 240, 255, 0.2), transparent 55%)',
+        desc: 'Builds upon the favorable-environment airframe by adding nose-mounted AESA Radar and LiDAR collision avoidance, autonomous pilot ejection seats, an extended dorsal solar cell array, a passenger lounge/wellness pod, and an upper stratospheric observatory deck.',
+        electricText: 'Extended Dorsal Solar Cell Array provides continuous cruise power optimization across the upper fuselage spine.',
+        fuelText: 'Retains clean-burn variable-area turbofans for climb and high-speed transit phases.',
+        nuclearText: 'SMR cogeneration sustains continuous life-support, observatory pressurization, and silent electric fan cruise.',
+        safetyText: 'Collision Avoidance Array (AESA Radar & LiDAR), Autonomous Ejection Seats (Pilots), Journey-Specific Amenities Bay (Lounge & Wellness Pod), and Stratospheric Observatory Deck.',
+        showDensitySim: false,
+        zones: [
+          { name: 'Nose & Flight Deck Upgrade', status: 'AESA + EJECTION', color: 'emerald', detail: 'Nose-mounted Collision Avoidance Array (AESA Radar & LiDAR) and Autonomous Pilot Ejection Seats.' },
+          { name: 'Dorsal Spine Energy Upgrade', status: 'EXTENDED SOLAR', color: 'cyan', detail: 'Extended Solar Cell Array delivers enhanced cruise power harvesting across clear stratospheric skies.' },
+          { name: 'Mid-Lower Deck Passenger Upgrade', status: 'WELLNESS POD', color: 'emerald', detail: 'Journey-Specific Amenities Bay featuring a dedicated passenger lounge and physiological wellness pod.' },
+          { name: 'Upper Aft Panoramic Upgrade', status: 'OBSERVATORY', color: 'cyan', detail: 'Stratospheric Observatory Deck providing unobstructed views at 120,000 ft altitude.' }
+        ]
+      },
+      {
+        id: 6,
+        shortTitle: '6. Full Counter-Protection Architecture',
+        title: 'Scenario 6: Integrated Counter-Protection & Threat Mitigation Profile',
+        tag: 'ALL COUNTER-MEASURES ACTIVE • FULL DEFENSE',
+        hudProfile: 'SCENARIO 6: FULL DEFENSE',
+        hudAlt: '120,000 ft • ALL-WEATHER',
+        hudDensity: 'ADAPTIVE • FULL SHIELD',
+        hudPower: 'E:50% | F:20% | N:30%',
+        hudFilters: 'ASH PURGE: OK • DE-ICE: ON',
+        hudShield: 'REDUNDANT ARRAYS + FLUTTER',
+        atmosphereCss: 'radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.22), rgba(7, 13, 25, 0.9) 75%)',
+        desc: 'The definitive Aurora H-3 Hybrid configuration combining all positive journey enhancements with active counter-failure subsystems: volcanic ash detection and filter purging, active de-icing, redundant radiation shielding arrays, aeroservoelastic flutter compensation, multi-spectrum cargo scanning, and active laminar flow control.',
+        electricText: 'Zone 1 Integrated Weather & Threat Mitigation + Solar Harvest; Zone 4 Active Laminar Flow Control with silent rear electric propulsion.',
+        fuelText: 'Turbofan Integrated Volcanic Ash Detection & Filter Purging (Ash Filter Status: OK) prevents particulate ingestion and core clogging.',
+        nuclearText: 'SMR Lead/Steel Containment reinforced by Redundant Radiation Shielding Arrays protecting against reactor and stratospheric cosmic radiation flux.',
+        safetyText: 'Active De-Icing Enabled, Aeroservoelastic Flutter Compensation, Multi-Spectrum Cargo Scanner, AESA/LiDAR Collision Avoidance, and Autonomous Ejection Seats.',
+        showDensitySim: false,
+        zones: [
+          { name: 'Zone 1: Integrated Weather & Threat Mitigation', status: 'SHIELDED', color: 'emerald', detail: 'AESA Radar/LiDAR, Lightning Dissipation, Autonomous Ejection Seats, and Solar Harvest active.' },
+          { name: 'Zone 2: Active De-Icing & Cargo Screening', status: 'DE-ICE ENABLED', color: 'emerald', detail: 'Active De-Icing Enabled, Multi-Spectrum Cargo Scanner active, and ECS cabin comfort locked.' },
+          { name: 'Zone 3: Volcanic Ash Detection & Filter Purging', status: 'FILTER STATUS: OK', color: 'amber', detail: 'Turbofan Integrated Volcanic Ash Detection & Filter Purging prevents engine degradation.' },
+          { name: 'Zone 4: Active Laminar Flow & Flutter Damping', status: 'FLUTTER DAMPED', color: 'cyan', detail: 'Active Laminar Flow Control and Aeroservoelastic Flutter Compensation neutralize turbulence stress.' },
+          { name: 'Zone 5: Redundant Radiation Shielding & Observatory', status: 'RADIATION SAFE', color: 'red', detail: 'Redundant Shielding Arrays protect occupants at 120,000 ft while Stratospheric Observatory remains open.' }
+        ]
+      }
+    ];
+
+    // 3. SIX FAILURE SCENARIOS & COUNTER-PROTECTION MATRIX DATA
+    const FAILURES = [
+      {
+        id: 'f1',
+        title: '1. Engine Degradation & Filter Clogging',
+        zone: 'ZONE 3 • VOLCANIC ASH PLUME',
+        threat: 'Ingestion of dense volcanic ash clouds during flight causes turbofan turbine-blade erosion, combustion instability, performance loss, and clogged intake filtration systems.',
+        counterTitle: 'Integrated Volcanic Ash Detection & Filter Purging',
+        counterSystems: [
+          'Turbofan Integrated Volcanic Ash Detection sensors detect silicate particulates ahead of compressor intake.',
+          'Automated reverse-pulse Filter Purging cycles clear particulate buildup in real time (Ash Filter Status: OK).',
+          'Tri-hybrid power bus automatically shifts cruise thrust share to the SMR-driven Rear Electric Fan.'
+        ],
+        simLog: 'SIMULATION [ZONE 3 ASH PLUME]: Silicate particulate spike detected at 42,000 ft → Pneumatic filter purge cycle triggered (0.4s) → Ash Filter Status: OK → Rear Electric Fan ramped to +22% thrust compensation.'
+      },
+      {
+        id: 'f2',
+        title: '2. Severe Airframe & Wing Icing (SLD)',
+        zone: 'ZONE 2 • SUPERCOOLED LARGE DROPLETS',
+        threat: 'Rapid Supercooled Large Droplet (SLD) ice accumulation along wing leading edges, control surfaces, and forward fuselage degrades lift and sharply increases parasitic drag.',
+        counterTitle: 'Dedicated SLD Ice Detection & Active De-Icing Systems',
+        counterSystems: [
+          'Optical and ultrasonic SLD Ice Detection sensors identify supercooled droplet impingement immediately.',
+          'Active De-Icing Enabled across wing leading edges, empennage, and cabin thermal zones via the tri-hybrid power bus.',
+          'Integrated anti-icing prevents control-surface hinge freezing across polar and mid-latitude cloud decks.'
+        ],
+        simLog: 'SIMULATION [ZONE 2 SLD ICING]: Supercooled droplet accretion detected on wing leading edge → Electro-thermal pulse de-icing energized from Main Bus → Leading-edge skin temp stabilized at +6°C → Lift coefficient restored 100%.'
+      },
+      {
+        id: 'f3',
+        title: '3. Electrical Surge & Lightning Strikes',
+        zone: 'ZONE 1 • HIGH-ENERGY ELECTRICAL STORM',
+        threat: 'Direct lightning attachment and high-energy atmospheric electrical discharges threaten sensitive flight avionics, SMR control electronics, and high-capacity battery arrays.',
+        counterTitle: 'Lightning Attachment & Extreme Wind Dissipation Grid',
+        counterSystems: [
+          'Forward nose Lightning Attachment points and conductive airframe dissipation strips safely channel mega-ampere surges.',
+          'Galvanic surge isolation protects Dual Avionics Bays, Main Bus, and Battery Array.',
+          'Integrated Weather & Threat Mitigation routes aircraft around peak convective storm cores.'
+        ],
+        simLog: 'SIMULATION [ZONE 1 LIGHTNING STRIKE]: 180 kA discharge intercepted at nose attachment node → Routed via dorsal dissipation grid to tail discharge wicks → Avionics & SMR bus voltage ripple < 0.02%.'
+      },
+      {
+        id: 'f4',
+        title: '4. Extreme Wind Shear & Structural Stress',
+        zone: 'ZONES 1 & 4 • TURBULENCE & GRAVITY WAVES',
+        threat: 'High mechanical stress, aeroelastic flutter, and aerodynamic instability induced by severe clear-air turbulence, extreme wind shear, and mesospheric gravity waves.',
+        counterTitle: 'Aeroservoelastic Flutter Compensation & Active Laminar Flow',
+        counterSystems: [
+          'Aeroservoelastic Flutter Compensation uses high-frequency control surface micro-actuation to damp structural wing and tail oscillations.',
+          'Active Laminar Flow Control stabilizes boundary-layer separation across swept wings.',
+          'Real-time structural stress telemetry monitors airframe load factors continuously.'
+        ],
+        simLog: 'SIMULATION [ZONE 4 GRAVITY WAVE]: 3.4 Hz aeroelastic wing oscillation detected → Aeroservoelastic Flutter Compensation counter-phase actuation engaged → Structural bending stress reduced by 68%.'
+      },
+      {
+        id: 'f5',
+        title: '5. Thermal Extremes & Cosmic Radiation Flux',
+        zone: 'ZONE 5 • POLAR STRATOSPHERE (-80°C / 120,000 FT)',
+        threat: 'Exposure to extreme polar stratospheric cold (-80°C), Polar Stratospheric Cloud (PSC) interaction, elevated cosmic radiation flux at 110,000–120,000 ft, and internal SMR emissions.',
+        counterTitle: 'Lead/Steel Containment & Redundant Radiation Shielding Arrays',
+        counterSystems: [
+          'Heavy Lead/Steel Containment isolates the Small Modular Liquid Metal Cooled Reactor (SMR).',
+          'Redundant Radiation Shielding Arrays line the aft bulkhead and upper hull to attenuate high-altitude cosmic radiation flux.',
+          'Environmental Control System (ECS) maintains ideal cabin temperature, humidity, and CO2 despite -80°C exterior temperatures.'
+        ],
+        simLog: 'SIMULATION [ZONE 5 POLAR 120,000 FT]: External ambient -80°C / Cosmic flux elevated → Redundant Shielding Arrays & Lead/Steel Containment active → Cabin dose rate maintained within sea-level background limits; cabin temp +21.5°C.'
+      },
+      {
+        id: 'f6',
+        title: '6. Imminent Collision, Cargo Threat, or Loss of Control',
+        zone: 'ALL ZONES • CRITICAL EMERGENCY PROTECTION',
+        threat: 'Mid-air collision hazards, concealed hazardous cargo anomalies, or unrecoverable catastrophic flight emergencies.',
+        counterTitle: 'AESA/LiDAR Collision Avoidance, Cargo Scanner & Autonomous Ejection',
+        counterSystems: [
+          'Nose-mounted Collision Avoidance Array (AESA Radar & LiDAR) executes autonomous evasive trajectory maneuvers.',
+          'Multi-Spectrum Cargo Scanner continuously inspects lower-deck cargo hold contents in flight.',
+          'Autonomous Ejection Seats (Pilots) guarantee rapid crew escape during unrecoverable emergencies.'
+        ],
+        simLog: 'SIMULATION [PROXIMITY & CARGO CHECK]: AESA Radar & LiDAR track closure rate 0.0 nm conflict → Multi-Spectrum Cargo Scanner reports all bays nominal → Autonomous Pilot Ejection Seats armed in standby.'
+      }
+    ];
+
+    // STATE MANAGEMENT
+    let currentTab = 'schematic';
+    let currentScenarioId = 1;
+    let currentSubsystemId = 'smr';
+    let currentLayerFilter = 'all';
+
+    // INITIALIZE APPLICATION
+    document.addEventListener('DOMContentLoaded', () => {
+      renderHotspotPills();
+      selectSubsystem('smr');
+      renderScenarioCards();
+      selectScenario(1);
+      renderFailureCards();
+      renderMasterTable();
+
+      // Bind SVG Hotspot Clicks
+      document.querySelectorAll('.hotspot').forEach(node => {
+        node.addEventListener('click', () => {
+          const id = node.getAttribute('data-id');
+          selectSubsystem(id);
+        });
+      });
+    });
+
+    // TAB NAVIGATION
+    function switchTab(tabName) {
+      currentTab = tabName;
+      ['schematic', 'scenarios', 'failures', 'docs'].forEach(t => {
+        const viewEl = document.getElementById(`view-${t}`);
+        const tabEl = document.getElementById(`tab-${t}`);
+        if (t === tabName) {
+          viewEl.classList.remove('hidden');
+          tabEl.className = 'nav-tab px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all bg-cyan-500/20 text-electric border border-cyan-400/40';
+        } else {
+          viewEl.classList.add('hidden');
+          tabEl.className = 'nav-tab px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all text-slate-300 hover:bg-slate-800/70 border border-transparent';
+        }
+      });
+    }
+
+    // LAYER ISOLATION FILTER IN SVG
+    function setLayerFilter(layer) {
+      currentLayerFilter = layer;
+      document.querySelectorAll('.layer-btn').forEach(btn => {
+        btn.classList.remove('ring-2', 'ring-white');
+      });
+      document.getElementById(`layer-${layer}`).classList.add('ring-2', 'ring-white');
+
+      const groups = document.querySelectorAll('.sys-group');
+      groups.forEach(g => {
+        if (layer === 'all' || g.classList.contains(`sys-${layer}`)) {
+          g.style.opacity = '1';
+          g.style.transition = 'opacity 0.35s ease';
+        } else {
+          g.style.opacity = '0.12';
+          g.style.transition = 'opacity 0.35s ease';
+        }
+      });
+    }
+
+    // RENDER QUICK HOTSPOT PILLS
+    function renderHotspotPills() {
+      const container = document.getElementById('hotspot-pills');
+      const colorMap = {
+        electric: 'border-cyan-500/40 text-cyan-300 hover:bg-cyan-950/60',
+        fuel: 'border-amber-500/40 text-amber-300 hover:bg-amber-950/60',
+        nuclear: 'border-red-500/40 text-red-300 hover:bg-red-950/60',
+        safety: 'border-emerald-500/40 text-emerald-300 hover:bg-emerald-950/60'
+      };
+      container.innerHTML = SUBSYSTEMS.map(s => `
+        <button onclick="selectSubsystem('${s.id}')" id="pill-${s.id}"
+          class="px-2.5 py-1 rounded-md text-[11px] font-mono border bg-slate-900/80 transition ${colorMap[s.category]}">
+          <span class="font-bold">${s.num}</span> ${s.name.split('(')[0].trim()}
+        </button>
+      `).join('');
+    }
+
+    // SELECT SUBSYSTEM & UPDATE INSPECTOR CARD
+    function selectSubsystem(id) {
+      currentSubsystemId = id;
+      const sys = SUBSYSTEMS.find(s => s.id === id) || SUBSYSTEMS[0];
+
+      const badgeStyles = {
+        electric: 'bg-cyan-500/20 text-electric border-cyan-400/40',
+        fuel: 'bg-amber-500/20 text-fuel border-amber-400/40',
+        nuclear: 'bg-red-500/20 text-nuclear border-red-400/40',
+        safety: 'bg-emerald-500/20 text-safety border-emerald-400/40'
+      };
+
+      const badgeEl = document.getElementById('insp-badge');
+      badgeEl.className = `inline-block px-2.5 py-0.5 rounded text-[11px] font-mono font-bold uppercase tracking-wider border ${badgeStyles[sys.category]}`;
+      badgeEl.textContent = sys.badge;
+
+      document.getElementById('insp-title').textContent = sys.name;
+      document.getElementById('insp-code').textContent = sys.code;
+      document.getElementById('insp-summary').textContent = sys.summary;
+      document.getElementById('insp-normal').textContent = sys.normal;
+      document.getElementById('insp-adverse').textContent = sys.adverse;
+      document.getElementById('insp-favorable').textContent = sys.favorable;
+
+      // Highlight active pill
+      document.querySelectorAll('#hotspot-pills button').forEach(b => b.classList.remove('ring-1', 'ring-white', 'bg-slate-800'));
+      const activePill = document.getElementById(`pill-${id}`);
+      if (activePill) activePill.classList.add('ring-1', 'ring-white', 'bg-slate-800');
+    }
+
+    // RENDER 6 SCENARIO CARDS
+    function renderScenarioCards() {
+      const grid = document.getElementById('scenario-cards-grid');
+      grid.innerHTML = SCENARIOS.map(s => `
+        <button onclick="selectScenario(${s.id})" id="scen-card-${s.id}"
+          class="text-left p-4 rounded-xl border transition-all bg-slate-900/75 border-slate-800 hover:border-cyan-400/50 flex flex-col justify-between gap-2">
+          <div>
+            <div class="text-[10px] font-mono uppercase tracking-wider text-cyan-400">${s.tag}</div>
+            <div class="text-sm font-bold text-white mt-1">${s.shortTitle}</div>
+          </div>
+          <p class="text-xs text-slate-400 line-clamp-2">${s.desc}</p>
+        </button>
+      `).join('');
+    }
+
+    // SELECT SCENARIO & SYNCHRONIZE HUD + SCHEMATIC + DETAILS
+    function selectScenario(id) {
+      currentScenarioId = id;
+      const scen = SCENARIOS.find(s => s.id === id) || SCENARIOS[0];
+
+      // Update Top HUD Ribbon
+      document.getElementById('hud-profile').textContent = scen.hudProfile;
+      document.getElementById('hud-altitude').textContent = scen.hudAlt;
+      document.getElementById('hud-density').textContent = scen.hudDensity;
+      document.getElementById('hud-power').textContent = scen.hudPower;
+      document.getElementById('hud-filters').textContent = scen.hudFilters;
+      document.getElementById('hud-shielding').textContent = scen.hudShield;
+
+      // Update Schematic Backdrop & Indicator
+      document.getElementById('schematic-atmosphere-bg').style.background = scen.atmosphereCss;
+      document.getElementById('schematic-zone-indicator').textContent = scen.hudProfile;
+
+      // Highlight Active Scenario Card
+      document.querySelectorAll('#scenario-cards-grid button').forEach(btn => {
+        btn.classList.remove('border-cyan-400', 'bg-cyan-950/25', 'glow-electric');
+        btn.classList.add('border-slate-800', 'bg-slate-900/75');
+      });
+      const activeCard = document.getElementById(`scen-card-${id}`);
+      if (activeCard) {
+        activeCard.classList.remove('border-slate-800', 'bg-slate-900/75');
+        activeCard.classList.add('border-cyan-400', 'bg-cyan-950/25', 'glow-electric');
+      }
+
+      // Populate Scenario Detail Panel
+      document.getElementById('scen-detail-tag').textContent = scen.tag;
+      document.getElementById('scen-detail-title').textContent = scen.title;
+      document.getElementById('scen-detail-desc').textContent = scen.desc;
+      document.getElementById('scen-electric-text').textContent = scen.electricText;
+      document.getElementById('scen-fuel-text').textContent = scen.fuelText;
+      document.getElementById('scen-nuclear-text').textContent = scen.nuclearText;
+      document.getElementById('scen-safety-text').textContent = scen.safetyText;
+
+      // Toggle Density Simulator Highlight
+      const simBox = document.getElementById('density-simulator-box');
+      if (scen.showDensitySim) {
+        simBox.classList.add('ring-2', 'ring-cyan-400/60');
+      } else {
+        simBox.classList.remove('ring-2', 'ring-cyan-400/60');
+      }
+
+      // Render Zones List
+      const badgeColors = {
+        cyan: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40',
+        amber: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+        red: 'bg-red-500/20 text-red-300 border-red-500/40',
+        emerald: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+      };
+      document.getElementById('zones-list').innerHTML = scen.zones.map(z => `
+        <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <div class="text-xs font-bold text-white">${z.name}</div>
+            <p class="text-xs text-slate-400 mt-0.5">${z.detail}</p>
+          </div>
+          <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase border shrink-0 self-start sm:self-center ${badgeColors[z.color]}">
+            ${z.status}
+          </span>
+        </div>
+      `).join('');
+    }
+
+    // INTERACTIVE ATMOSPHERIC DENSITY & LATITUDE CALCULATOR (SCENARIO 2)
+    function updateAtmosphereSim() {
+      const alt = parseInt(document.getElementById('sim-alt-slider').value, 10);
+      const lat = parseInt(document.getElementById('sim-lat-slider').value, 10);
+
+      document.getElementById('sim-alt-val').textContent = `${alt.toLocaleString()} ft`;
+      const latLabel = lat === 0 ? '0° EQUATORIAL' : lat >= 75 ? `${lat}° POLAR` : `${lat}° MID-LATITUDE`;
+      document.getElementById('sim-lat-val').textContent = latLabel;
+
+      // Determine Atmospheric Layer
+      let layer = 'TROPOSPHERE';
+      if (alt >= 110000) layer = 'MESOSPHERE BOUNDARY';
+      else if (alt >= 36000) layer = 'STRATOSPHERE';
+      document.getElementById('sim-layer-badge').textContent = layer;
+
+      // Exponential Barometric Density Approximation (Sea level 1.225 kg/m³ -> ~0.007 kg/m³ at 120k ft)
+      const latFactor = 1 + (lat / 90) * 0.08;
+      const rho = (1.225 * Math.exp(-alt / 27500) * latFactor);
+      const rhoFormatted = rho >= 0.1 ? rho.toFixed(2) : rho.toFixed(3);
+
+      // Ambient Temperature Model
+      let tempC = 15 - (alt / 1000) * 1.98;
+      if (alt > 36000 && alt < 85000) tempC = -56.5 - (lat / 90) * 12;
+      if (alt >= 85000) tempC = -65 - ((alt - 85000) / 35000) * 15 - (lat / 90) * 5;
+
+      // Propulsion Adaptation Readouts
+      const nozzleMode = alt < 25000 ? 'CONVERGENT (DENSE AIR)' : alt < 75000 ? 'VARIABLE-AREA EXPANDING' : 'MAX EXPANSION (THIN AIR)';
+      const braytonMode = alt >= 60000 ? 'CLOSED-BRAYTON ACTIVE' : 'STEAM-TURBINE BASELINE';
+
+      document.getElementById('sim-rho-out').textContent = `${rhoFormatted} kg/m³`;
+      document.getElementById('sim-temp-out').textContent = `${tempC.toFixed(1)}°C`;
+      document.getElementById('sim-nozzle-out').textContent = nozzleMode;
+      document.getElementById('sim-brayton-out').textContent = braytonMode;
+
+      // Sync with Top HUD
+      document.getElementById('hud-altitude').textContent = `${alt.toLocaleString()} ft • ${layer}`;
+      document.getElementById('hud-density').textContent = `${rhoFormatted} kg/m³ • ${tempC.toFixed(1)}°C`;
+    }
+
+    // RENDER FAILURE SCENARIOS & COUNTER-MITIGATION CARDS
+    function renderFailureCards() {
+      const query = (document.getElementById('failure-search')?.value || '').toLowerCase();
+      const filtered = FAILURES.filter(f =>
+        f.title.toLowerCase().includes(query) ||
+        f.threat.toLowerCase().includes(query) ||
+        f.counterTitle.toLowerCase().includes(query) ||
+        f.counterSystems.some(c => c.toLowerCase().includes(query))
+      );
+
+      const grid = document.getElementById('failure-cards-grid');
+      grid.innerHTML = filtered.map(f => `
+        <div class="glass-panel rounded-2xl p-5 flex flex-col justify-between gap-4 border-l-4 border-red-500/70">
+          <div class="space-y-3">
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-red-400">${f.zone}</span>
+                <h3 class="text-base font-bold text-white mt-0.5">${f.title}</h3>
+              </div>
+              <button onclick="runMitigationTest('${f.id}')"
+                class="px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 hover:bg-emerald-500/30 transition shrink-0">
+                ▶ Test Mitigation
+              </button>
+            </div>
+
+            <div class="bg-red-950/20 border border-red-500/25 rounded-xl p-3">
+              <div class="text-[10px] font-mono font-bold uppercase text-red-400 mb-1">Failure Mechanism &amp; Risk</div>
+              <p class="text-xs text-slate-300 leading-relaxed">${f.threat}</p>
+            </div>
+
+            <div class="bg-emerald-950/20 border border-emerald-500/25 rounded-xl p-3">
+              <div class="text-[10px] font-mono font-bold uppercase text-emerald-400 mb-1">Counter-Feature: ${f.counterTitle}</div>
+              <ul class="list-disc pl-4 space-y-1 text-xs text-slate-300">
+                ${f.counterSystems.map(cs => `<li>${cs}</li>`).join('')}
+              </ul>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // TRIGGER MITIGATION DIAGNOSTIC SIMULATION
+    function runMitigationTest(id) {
+      const f = FAILURES.find(item => item.id === id);
+      if (!f) return;
+      const consoleEl = document.getElementById('mitigation-console');
+      document.getElementById('console-title').textContent = `${f.title} → ${f.counterTitle}`;
+      document.getElementById('console-log').textContent = f.simLog;
+      consoleEl.classList.remove('hidden');
+      consoleEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // RENDER MASTER SPECIFICATION TABLE
+    function renderMasterTable() {
+      const query = (document.getElementById('table-search')?.value || '').toLowerCase();
+      const filterId = document.getElementById('table-filter')?.value || 'all';
+
+      const rows = SCENARIOS.filter(s => {
+        const matchesId = filterId === 'all' || String(s.id) === filterId;
+        const blob = `${s.title} ${s.tag} ${s.desc} ${s.electricText} ${s.fuelText} ${s.nuclearText} ${s.safetyText}`.toLowerCase();
+        const matchesQuery = !query || blob.includes(query);
+        return matchesId && matchesQuery;
+      });
+
+      const tbody = document.getElementById('master-table-body');
+      tbody.innerHTML = rows.map(s => `
+        <tr class="hover:bg-slate-900/60 transition align-top">
+          <td class="p-4">
+            <div class="font-bold text-white text-sm">${s.shortTitle}</div>
+            <div class="text-[10px] font-mono text-cyan-400 mt-1">${s.tag}</div>
+          </td>
+          <td class="p-4 leading-relaxed">
+            <p class="text-slate-300 mb-2">${s.desc}</p>
+            <ul class="space-y-1 text-[11px] font-mono text-slate-400">
+              ${s.zones.map(z => `<li>• <span class="text-slate-200">${z.name}:</span> ${z.status}</li>`).join('')}
+            </ul>
+          </td>
+          <td class="p-4 space-y-2 leading-relaxed">
+            <div><strong class="text-electric font-mono">Electric:</strong> ${s.electricText}</div>
+            <div><strong class="text-fuel font-mono">Fuel:</strong> ${s.fuelText}</div>
+            <div><strong class="text-nuclear font-mono">Nuclear SMR:</strong> ${s.nuclearText}</div>
+          </td>
+          <td class="p-4 leading-relaxed">
+            <div class="text-emerald-300 font-mono font-semibold mb-1">Safety &amp; Cabin Systems:</div>
+            <p>${s.safetyText}</p>
+          </td>
+        </tr>
+      `).join('');
+    }
+  </script>
+</body>
+</html>
